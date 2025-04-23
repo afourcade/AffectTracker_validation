@@ -16,7 +16,8 @@
 ## Project description
 
 Scripts for the validation of the AffectTracker, a tool to continously rate 2d affective experiences in real-time
-Fourcade, A., Malandrone, F., Roellecke, L., Ciston, A., de Mooij, J., Villringer, A., Carletto S., Gaebler, M. (2024, December 16). AffectTracker: Real-time continuous rating of affective experience in immersive Virtual Reality. PsyArXiv preprint
+
+Fourcade, A., Malandrone, F., Roellecke, L., Ciston, A., de Mooij, J., Villringer, A., Carletto S., Gaebler, M. (2024, December 16). AffectTracker: Real-time continuous rating of affective experience in immersive Virtual Reality. PsyArXiv preprint https://doi.org/10.31234/osf.io/xemwb
 
 https://github.com/afourcade/AffectTracker
 
