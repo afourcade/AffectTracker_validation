@@ -4,7 +4,7 @@
 # Output: csv files (dataframe) containing ANOVA results (and post-hoc t-tests if significant effect of phase) 
 # and figures of variability
 # Author: Antonin Fourcade
-# Last version: 30.09.2024
+# Last version: 12.06.2025
 ########################################################################################################################
 
 # %%
@@ -35,7 +35,7 @@ cri_sr_select = ['cr_mean', 'cr_std'] # cri_sr of interest
 rat_dim = {'valence': 'v', 'arousal': 'a', 'distance': 'dist', 'angle': 'angle'} # dictionnary for rating dimensions
 #anova_factors = ['video'] # ['phase', 'video']; factors for ANOVA, note: these are categorical variables
 # position of interest (phase 2)
-pos_select = ['seated'] # ['seated', 'standing']
+pos_select = ['seated']  # ['seated', 'standing']
 # quadrants/videos (phase 1)
 quadrants = ["HP", "HN", "LP", "LN"]
 # feedback of interest (phase 1)
@@ -49,11 +49,15 @@ filename_phase1 = 'cri_sr_clean.csv'
 phase1_cri_sr_path = phase1_data_path + bids_folder + '/' + filename_phase1
 phase1_cri_sr = pd.read_csv(phase1_cri_sr_path)
 
+#excluded_subs = ['sub-13'] # excluded subjects from phase 2
+# remove excluded subjects from phase 2 cri_sr
+phase2_cri_sr = phase2_cri_sr[~phase2_cri_sr['sub'].isin(['sub-13'])]
+
 # save path
 if len(pos_select) == 2:
-    save_path = avr_path + 'Phase_2/affectivevr/comparison_phase_variability/all_positions/'
+    save_path = 'E:/AffectiveVR/affecttracker_validation/results/comparison_selection_evaluation/variability/all_positions/'
 else:
-    save_path = avr_path + 'Phase_2/affectivevr/comparison_phase_variability/' + pos_select[0] + '/'
+    save_path = 'E:/AffectiveVR/affecttracker_validation/results/comparison_selection_evaluation/variability/' + pos_select[0] + '/'
 if not os.path.exists(save_path): # create folder if it doesn't exist
     os.makedirs(save_path)
 
@@ -160,7 +164,7 @@ for cri_sr in cri_sr_list:
         plt9.ggplot(cri_sr_data, plt9.aes(x='video', y=cri_sr)) 
         + plt9.geom_violin(plt9.aes(fill='video'), position=plt9.position_nudge(x=0.2), style='right', alpha=0.5)
         # Add the boxplot layer
-        + plt9.geom_boxplot(plt9.aes(fill='video'), position=plt9.position_nudge(x=0.2), width=0.1, alpha=1, outlier_shape='.', outlier_size=1.5)
+        + plt9.geom_boxplot(plt9.aes(fill='video'), position=plt9.position_nudge(x=0.2), width=0.1, alpha=1, outlier_shape='')
         # Add the points layer
         + plt9.geom_point(plt9.aes(color= 'sub-id'), position=plt9.position_jitter(width=0.1, height=0), size=1.5, alpha=0.5)
         #+ plt9.geom_point(plt9.aes(color= 'sub-id'), position=plt9.position_nudge(x=-0.2), size=1.5, alpha=0.5)  

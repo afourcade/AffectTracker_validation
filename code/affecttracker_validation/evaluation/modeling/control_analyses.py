@@ -3,7 +3,7 @@
 # Need csv files containing CRi, SR and survey data, from cri_sr.py, import_PRE_questionnaire.py and import_POST_questionnaire.py
 # Output: csv files (dataframe) containing ANOVA results
 # Author: Antonin Fourcade
-# Last version: 16.02.2024
+# Last version: 12.03.2025
 ########################################################################################################################
 
 # %%
@@ -39,7 +39,7 @@ cri_sr = pd.read_csv(cri_path)
 # CRis of interest
 cri_select = ['cr_mean', 'cr_std', 'cr_skew', 'cr_kurtosis']
 # position of interest
-pos_select = ['seated'] # ['seated', 'standing']
+pos_select = ['seated', 'standing'] # ['seated']
 
 # path to survey csv files and load data
 filename_pre = 'pre_survey_preprocessed.csv'
@@ -49,11 +49,19 @@ post_path = data_path + bids_folder + '/' + filename_post
 pre_survey = pd.read_csv(pre_path)
 post_survey = pd.read_csv(post_path)
 
+# excluded subjects
+excluded_subs = ['sub-13'] # subjects to exclude from analysis, e.g. due to technical issues or missing data
+# remove excluded subjects from cri_sr, pre_survey and post_survey dataframes
+cri_sr = cri_sr[~cri_sr['sub'].isin(excluded_subs)]
+pre_survey = pre_survey[~pre_survey['sub'].isin(excluded_subs)]
+post_survey = post_survey[~post_survey['sub'].isin(excluded_subs)]
+
+
 # save path
 if len(pos_select) == 2:
-    save_path = phase_path + 'affectivevr/control_analyses/all_positions/'
+    save_path = 'E:/AffectiveVR/affecttracker_validation/results/evaluation/control_analyses/all_positions/'
 else:
-    save_path = phase_path + 'affectivevr/control_analyses/' + pos_select[0] + '/'
+    save_path = 'E:/AffectiveVR/affecttracker_validation/results/evaluation/control_analyses/' + pos_select[0] + '/'
 if not os.path.exists(save_path): # create folder if it doesn't exist
     os.makedirs(save_path)
 

@@ -3,7 +3,7 @@
 # Need csv file containing CR data (from import_cr.py)
 # Output: figures of CRs
 # Author: Antonin Fourcade
-# Last version: 30.10.2024
+# Last version: 12.06.2025
 ########################################################################################################################
 
 # %%
@@ -50,13 +50,18 @@ debug = True # debug mode (True/False)
 # position of interest
 pos_select = ['seated'] # ['seated', 'standing']
 
+# excluded subjects
+excluded_subs = ['sub-13'] # excluded subjects from phase 2
+
 # path to CR csv file and load data
 filename_cr = 'cr_rs_clean.csv'
 cr_path = data_path + bids_folder + '/' + filename_cr
 cr_all = pd.read_csv(cr_path)
+# remove excluded subjects from cr_all
+cr_all = cr_all[~cr_all['sub'].isin(excluded_subs)]
 
 # save path
-save_path = phase_path + 'affectivevr/cr_plots/'
+save_path = 'E:/AffectiveVR/affecttracker_validation/results/evaluation/cr_plots/'
 save_ind_plot_path = save_path + 'individual_plots/'
 # create folders if not there
 if not os.path.exists(save_path): # create folder if it doesn't exist

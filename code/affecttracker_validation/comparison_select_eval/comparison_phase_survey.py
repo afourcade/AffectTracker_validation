@@ -4,7 +4,7 @@
 # Output: csv files (dataframe) containing ANOVA results (and post-hoc t-tests if significant effect of phase) 
 # and figures of questionnaires
 # Author: Antonin Fourcade
-# Last version: 23.09.2024
+# Last version: 12.06.2025
 ########################################################################################################################
 
 # %%
@@ -46,9 +46,9 @@ phase1_survey = pd.read_csv(phase1_survey_path)
 
 # save path
 if len(pos_select) == 2:
-    save_path = avr_path + 'Phase_2/affectivevr/comparison_phase_survey/all_positions/'
+    save_path = 'E:/AffectiveVR/affecttracker_validation/results/comparison_selection_evaluation/survey/all_positions/'
 else:
-    save_path = avr_path + 'Phase_2/affectivevr/comparison_phase_survey/' + pos_select[0] + '/'
+    save_path = 'E:/AffectiveVR/affecttracker_validation/results/comparison_selection_evaluation/survey/' + pos_select[0] + '/'
 if not os.path.exists(save_path): # create folder if it doesn't exist
     os.makedirs(save_path)
 
@@ -70,6 +70,10 @@ phase1_survey['phase'] = 1
 
 # %%
 # Phase 2 data formatting
+# excluded subjects
+excluded_subs = ['sub-13'] # subjects to exclude from analysis
+# remove excluded subjects from phase 2 survey
+phase2_survey = phase2_survey[~phase2_survey['sub'].isin(excluded_subs)]
 # select only position of interest
 phase2_survey = phase2_survey[phase2_survey['position'].isin(pos_select)]
 # remove position and gender columns
@@ -145,7 +149,7 @@ for score in score_list:
         # Set the y-axis labels and breaks
         + plt9.scale_y_continuous(name = score, breaks= np.arange(range_responses[score][0], range_responses[score][1]+1, break_steps[score]), limits = range_responses[score])
         # Set the x-axis label
-        + plt9.xlab(xlab='phase')
+        + plt9.xlab('phase')
         # Set the color scale legend
         + plt9.scale_color_continuous(name = 'sub-id')
         # Set the theme to a white background with a base font size of 14

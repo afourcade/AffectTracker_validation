@@ -3,7 +3,7 @@
 # Need csv files containing demographics, CRi, SR and survey data, from cri_sr.py, import_PRE_questionnaire.py and import_POST_questionnaire.py
 # Output: csv files (dataframe) containing descriptive stats for each data type
 # Author: Antonin Fourcade
-# Last version: 08.02.2024
+# Last version: 12.06.2025
 ########################################################################################################################
 
 # %%
@@ -17,21 +17,13 @@ phase_path = 'E:/AffectiveVR/Phase_2/'
 data_path = phase_path + 'Data/'
 bids_folder = 'AVR' # folder with data in bids format
 
-# experiment parameters
-# blocks = ['Practice', 'Experiment']
-# logging_freq = ['CR', 'SR']
-# test_site = ['TOR', 'BER']  # Torino = 0, Berlin = 1
-# position = ['seated', 'standing']  # Seated = 0, Standing = 1
-# gender = ['male', 'female', 'non_binary'] # male = 0, female = 1, non_binary = 2
-# cri_list = ['last', 'mean', 'median', 'mode', 'max', 'min', 'std', 'cv', 'range', 'iqr', 'skew', 'kurtosis', 'auc', 'cp']
-rat_dim = {'valence': 'v', 'arousal': 'a', 'distance': 'dist', 'angle': 'angle'} # dictionnary for rating dimensions
-
 # path to demographics csv file and load data
 filename_dem = 'participants.csv'
 dem_path = data_path + bids_folder + '/' + filename_dem
 dem = pd.read_csv(dem_path)
 
 # path to CRi-SR csv file and load data
+rat_dim = {'valence': 'v', 'arousal': 'a', 'distance': 'dist', 'angle': 'angle'} # dictionnary for rating dimensions
 filename_cri = 'cri_sr_clean.csv'
 cri_path = data_path + bids_folder + '/' + filename_cri
 cri_sr = pd.read_csv(cri_path)
@@ -46,8 +38,16 @@ post_path = data_path + bids_folder + '/' + filename_post
 pre_survey = pd.read_csv(pre_path)
 post_survey = pd.read_csv(post_path)
 
+# excluded subjects
+excluded_subs = ['sub-13'] # subjects to exclude from the analysis
+# remove excluded subjects from demographics, CRi and SR data
+dem = dem[~dem['sub'].isin(excluded_subs)]
+cri_sr = cri_sr[~cri_sr['sub'].isin(excluded_subs)]
+pre_survey = pre_survey[~pre_survey['sub'].isin(excluded_subs)]
+post_survey = post_survey[~post_survey['sub'].isin(excluded_subs)]
+
 # save path
-save_path = phase_path + 'affectivevr/descriptive_stats/'
+save_path = 'E:/AffectiveVR/affecttracker_validation/results/evaluation/descriptive_stats/'
 if not os.path.exists(save_path): # create folder if it doesn't exist
     os.makedirs(save_path)
 

@@ -3,7 +3,7 @@
 # Need csv files containing CRi and SR data, from cri_sr.py
 # Output: csv files (dataframe) containing results
 # Author: Antonin Fourcade
-# Last version: 30.09.2024
+# Last version: 12.06.2025
 ########################################################################################################################
 
 # %%
@@ -39,11 +39,16 @@ cri_sr = pd.read_csv(cri_path)
 # CRis of interest
 cri_select = ['cr_mean', 'cr_std', 'cr_skew', 'cr_kurtosis']
 # position of interest
-pos_select = ['seated'] 
-#pos_select = ['seated', 'standing']
+#pos_select = ['seated'] 
+pos_select = ['seated', 'standing']
+
+# excluded subjects
+excluded_subs = ['sub-13']
+# remove excluded subjects from cri_sr
+cri_sr = cri_sr[~cri_sr['sub'].isin(excluded_subs)]
 
 # save path
-save_path = phase_path + 'affectivevr/corr_results/'
+save_path = 'E:/AffectiveVR/affecttracker_validation/results/evaluation/corr_results/'
 if not os.path.exists(save_path): # create folder if it doesn't exist
     os.makedirs(save_path)
 
@@ -233,3 +238,5 @@ n2 = len(cri_sr) # phase 2
 # calculate z and p
 z, p = independent_corr(corr1, corr2, n1, n2)
 
+
+# %%

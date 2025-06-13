@@ -1,0 +1,322 @@
+########################################################################################################################
+# Script for analysis of the frequency of change in CRs
+# Input: csv file containing CR data, from import_cr.py
+# Output: csv file containing results
+# Author: Antonin Fourcade
+# Last version: 12.06.2025
+# ########################################################################################################################
+
+# %%
+# import packages
+import pandas as pd
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from pingouin import ttest
+
+# %%
+# Set paths and experiment parameters
+phase_path = 'E:/AffectiveVR/Phase_2/'
+data_path = phase_path + 'Data/'
+bids_folder = 'AVR'  # folder with data in bids format
+filename_cr = 'cr_rs_clean.csv' # CR data file
+cr_path = data_path + bids_folder + '/' + filename_cr
+fs = 20 # sampling frequency of CRs in Hz
+excluded_subs = ['sub-13']  # list of subjects to exclude from the analysis, e.g. outliers or missing data
+# save path
+save_path = 'E:/AffectiveVR/affecttracker_validation/results/evaluation/cr_freq_change/'
+if not os.path.exists(save_path):  # create folder if it doesn't exist
+    os.makedirs(save_path)
+
+# %% LOAD CR DATA
+cr_data = pd.read_csv(cr_path)
+# exclude subjects from the analysis
+if excluded_subs:
+    cr_data = cr_data[~cr_data['sub'].isin(excluded_subs)]
+
+
+# %% FREQUENCY CHANGE WITH THRESHOLD ANALYSIS
+# for each participant, calculate the frequency of change in CRs
+# CRs are considered to have changed if the value is different from the previous value by a threshold of thresh
+# thresh = 0.1  # threshold for change, 0.1 = 5% of the range [-1, 1] for valence and arousal CRs
+thresh = 0.05
+def calculate_change_frequency(cr_series, fs, threshold):
+    """
+    Calculate the frequency of change in a CR series.
+    A change is defined as an absolute difference greater than the threshold.
+    :param cr_series: Series of CR values for a participant.
+    :param fs: Sampling frequency
+    :param threshold: Threshold for defining a change.
+    :return: Frequency of change in the CR series.
+    """
+    if len(cr_series) < 2:
+        # If there are not enough data points to calculate changes, return 0
+        print("Not enough data points to calculate changes.")
+        return 0
+
+    changes = np.abs(np.diff(cr_series)) > threshold
+
+    return np.sum(changes) / ((len(cr_series)-1)/fs)  # frequency of change
+
+# Calculate change frequency for each participant and each CR dimension
+cr_change_freq_v = cr_data.groupby('sub')['cr_v'].apply(calculate_change_frequency, fs=fs, threshold=thresh)
+cr_change_freq_a = cr_data.groupby('sub')['cr_a'].apply(calculate_change_frequency, fs=fs, threshold=thresh)
+# regroup results into a DataFrame
+cr_change_freq = pd.DataFrame({
+    'sub': cr_change_freq_v.index,
+    'cr_change_freq_v': cr_change_freq_v.values,
+    'cr_change_freq_a': cr_change_freq_a.values
+})
+# add a column for the average change frequency between valence and arousal
+cr_change_freq['cr_change_freq_avg'] = (cr_change_freq['cr_change_freq_v'] + cr_change_freq['cr_change_freq_a']) / 2
+# round the values to 2 decimal places
+cr_change_freq = cr_change_freq.round(2)
+# save the results to a csv file
+save_name = f'cr_change_frequency_w_thresh{thresh}.csv'
+results_path = os.path.join(save_path, save_name)
+cr_change_freq.to_csv(results_path, index=False)
+
+# %% STATISTICS ON CHANGE FREQUENCY
+
+# Descriptive statistics for change frequencies
+cr_change_freq_desc = cr_change_freq.describe().T
+# Save descriptive statistics to a csv file
+desc_save_path = os.path.join(save_path, f'cr_change_frequency_descriptive_stats_w_thresh{thresh}.csv')
+cr_change_freq_desc.to_csv(desc_save_path)
+
+# Perform paired t-tests for Valence and Arousal change frequencies
+ttest_results = ttest(cr_change_freq['cr_change_freq_v'], cr_change_freq['cr_change_freq_a'], paired=True)
+# Print the results
+print("Paired t-test results for Valence and Arousal change frequencies:")
+print(ttest_results)
+# add a column (first) for the variables tested
+ttest_results.insert(0, 'variables', ['cr_change_freq_v vs cr_change_freq_a'])
+# add mean difference between the two dimensions
+ttest_results['mean_diff'] = cr_change_freq['cr_change_freq_v'].mean() - cr_change_freq['cr_change_freq_a'].mean()
+# add a column for the threshold used
+ttest_results['threshold'] = thresh
+# add a column for the number of participants
+ttest_results['n_participants'] = len(cr_change_freq)
+# add a column for the number of CRs per participant
+ttest_results['n_crs_per_participant'] = cr_data.groupby('sub').size().mean()  # average number of CRs per participant
+# add a column for the sampling frequency
+ttest_results['fs'] = fs
+# Save the t-test results to a csv file
+ttest_results_path = os.path.join(save_path, f'cr_change_frequency_ttest_results_w_thresh{thresh}.csv')
+ttest_results.to_csv(ttest_results_path, index=False)
+
+
+# %% PLOT CHANGE FREQUENCY RAINCLOUD PLOT
+
+# pivot the DataFrame to long format for raincloud plot
+def pivot_cr_change_freq(cr_change_freq):
+    """
+    Pivot the change frequency DataFrame to long format for raincloud plot.
+    :param cr_change_freq: DataFrame containing the change frequency data for each participant.
+    :return: Pivoted DataFrame in long format.
+    """
+    cr_change_freq_long = cr_change_freq.melt(id_vars='sub', 
+                                               value_vars=['cr_change_freq_v', 'cr_change_freq_a'],
+                                               var_name='dimension', 
+                                               value_name='cr_change_freq')
+    return cr_change_freq_long  
+cr_change_freq_long = pivot_cr_change_freq(cr_change_freq)
+
+def plot_change_frequency_raincloud(cr_change_freq):
+    """
+    Plot the change frequency of CRs for each participant using a raincloud plot.
+    :param cr_change_freq: DataFrame in long format containing the change frequency data for each participant.
+    :return: Figure object of the plot.
+    """
+    fig, ax = plt.subplots(figsize=(6, 6))
+    
+    # half violin plot for each dimension
+    sns.violinplot(x='dimension', y='cr_change_freq', data=cr_change_freq, ax=ax, alpha=0.5, inner=None, split=True,
+                   hue='dimension', dodge=True, scale='width', linewidth=1.5, cut=0, legend='brief'
+                   )
+
+
+
+    # Overlay the individual data points
+    sns.stripplot(x='dimension', y='cr_change_freq', data=cr_change_freq, ax=ax, hue='sub', alpha=0.75, jitter=True, dodge=True, size=3)
+    # Overlay the boxplot, with no outliers
+    sns.boxplot(x='dimension', y='cr_change_freq', data=cr_change_freq, ax=ax, width=0.2, fliersize=0,
+                hue='dimension', linewidth=1.5, boxprops=dict(alpha=0.5), dodge=False)
+
+    # rename the dimensions for better readability
+    ax.set_xticklabels(['Valence', 'Arousal'])
+    ax.set_title('Change Frequency of CRs')
+    ax.set_xlabel('Dimension')
+    ax.set_ylabel('Change Frequency (Hz)')
+    plt.xticks(rotation=45)
+    plt.grid(axis='y',)
+    # Remove the legend for the hue
+    plt.legend([], [], frameon=False)
+    # Set the y-axis limits
+    ax.set_ylim(0, 1.5) # adjust this limit based on your data range
+    
+    plt.tight_layout()
+    plt.show()
+    
+    return fig
+# Plot the change frequency for all participants
+fig = plot_change_frequency_raincloud(cr_change_freq_long)
+# save the plot
+save_name = f'cr_change_frequency_raincloud_plot_w_thresh{thresh}.png'
+plot_save_path = os.path.join(save_path, save_name)
+fig.savefig(plot_save_path, dpi=300, bbox_inches='tight')
+
+
+# %% PLOT CHANGE FREQUENCY BAR PLOT
+
+import matplotlib.pyplot as plt
+def plot_change_frequency(cr_change_freq):
+    """
+    Plot the change frequency of CRs for each participant.
+    :param cr_change_freq: DataFrame containing the change frequency data for each participant.
+    :return: Figure object of the plot.
+    """
+    fig, ax = plt.subplots(figsize=(12, 6))
+    # Plot Valence and Arousal change frequencies next to each other for each participant
+    ax.bar(cr_change_freq['sub'], cr_change_freq['cr_change_freq_v'], label='Valence', alpha=0.7, width=0.4, align='center')
+    ax.bar(cr_change_freq['sub'], cr_change_freq['cr_change_freq_a'], label='Arousal', alpha=0.7, width=0.4, align='edge')
+
+    ax.set_title('Change Frequency of CRs')
+    ax.set_xlabel('Participant')
+    ax.set_ylabel('Change Frequency (Hz)')
+    ax.legend()
+    plt.xticks(rotation=45)
+    plt.grid(axis='y')
+    
+    plt.tight_layout()
+    plt.show()
+    
+    return fig
+# Plot the change frequency for all participants
+fig = plot_change_frequency(cr_change_freq)
+# save the plot
+save_name = f'cr_change_frequency_plot_w_thresh{thresh}.png'
+plot_save_path = os.path.join(save_path, save_name)
+fig.savefig(plot_save_path, dpi=300, bbox_inches='tight')
+
+
+# %% FREQUENCY ANALYSIS
+# for each participant, calculate the PSD of the CRs for each dimension
+
+def calculate_psd(cr_series, fs, nperseg=None, noverlap=None):
+    """
+    Calculate the Power Spectral Density (PSD) of a CR series using Welch's method.
+    :param cr_series: Series of CR values for a participant.
+    :param fs: Sampling frequency
+    :param nperseg: Length of each segment for Welch's method, default is None (will use default value).
+    :param noverlap: Number of points to overlap between segments, default is None (will use default value).
+    :note: If nperseg is None, it will use the default value of 256 points.
+    :return: Frequencies and PSD values.
+    """
+    from scipy.signal import welch
+    cr_series = np.asarray(cr_series)
+    if np.any(np.isnan(cr_series)):
+        nans = np.isnan(cr_series)
+        not_nans = ~nans
+        cr_series[nans] = np.interp(np.flatnonzero(nans), np.flatnonzero(not_nans), cr_series[not_nans])
+    #cr_series = cr_series[~np.isnan(cr_series)]  # Remove NaNs
+    frequencies, psd = welch(cr_series, fs=fs, nperseg=nperseg, noverlap=noverlap) 
+    #frequencies, psd = welch(cr_series, fs=fs)
+    return frequencies, psd
+# Set parameters for PSD calculation
+nperseg = 256  # 256, 512, 1024. Number of points per segment for Welch's method
+noverlap = nperseg // 2 # 0, nperseg // 2. Overlap between segments, default is half of nperseg
+
+# Calculate PSD for each participant and each CR dimension
+cr_psd_v = cr_data.groupby('sub')['cr_v'].apply(calculate_psd, fs=fs, nperseg=nperseg)
+cr_psd_a = cr_data.groupby('sub')['cr_a'].apply(calculate_psd, fs=fs, nperseg=nperseg)
+# regroup results into a DataFrame
+cr_psd = pd.DataFrame({
+    'sub': cr_psd_v.index,
+    'cr_psd_v': cr_psd_v.values,
+    'cr_psd_a': cr_psd_a.values
+})
+# save the results to a csv file
+save_name = 'cr_psd.csv'
+results_path = os.path.join(save_path, save_name)
+cr_psd.to_csv(results_path, index=False)
+
+# %% PLOT CR PSD
+def plot_cr_psd(cr_psd, fs, xlim=None):
+    """
+    Plot the Power Spectral Density (PSD) of CRs for each participant.
+    Show only legend for Valence (solid) and Arousal (dashed), but keep unique color per subject.
+    :param cr_psd: DataFrame containing the PSD data for each participant.
+    :param fs: Sampling frequency
+    :param xlim: x-axis limits for the plot, default is (0, fs/2).   
+    :return: Figure object of the plot.
+    """
+    fig = plt.figure(figsize=(12, 6))
+    colors = plt.cm.tab20.colors
+    for idx, (index, row) in enumerate(cr_psd.iterrows()):
+        color = colors[idx % len(colors)]
+        # Only add legend for the first subject
+        if idx == 0:
+            plt.semilogy(row['cr_psd_v'][0], row['cr_psd_v'][1], label="Valence", color=color)
+            plt.semilogy(row['cr_psd_a'][0], row['cr_psd_a'][1], label="Arousal", linestyle='--', color=color)
+        else:
+            plt.semilogy(row['cr_psd_v'][0], row['cr_psd_v'][1], color=color)
+            plt.semilogy(row['cr_psd_a'][0], row['cr_psd_a'][1], linestyle='--', color=color)
+    plt.title('Power Spectral Density of CRs')
+    plt.xlabel('Frequency (Hz)')
+    plt.ylabel('PSD (V^2/Hz)')
+    plt.legend(loc='upper right')
+    if xlim is None:
+        xlim = (0, fs/2)
+    plt.xlim(xlim)
+    plt.grid()
+    plt.show()
+    return fig
+
+# set the parameters for the plot
+#xlim = (0, 0.1)
+xlim = (0, 10)  # x-axis limits for the plot
+
+# Plot the PSD for all participants
+fig = plot_cr_psd(cr_psd, fs, xlim)
+# save the plot
+save_name = f'cr_psd_plot_{xlim[0]}_{xlim[1]}.png'
+plot_save_path = os.path.join(save_path, save_name)
+fig.savefig(plot_save_path, dpi=300, bbox_inches='tight')
+
+# %% PLOT PSD FOR ONE SUBJECT
+sub_id = 'sub-13'  # specify the subject ID you want to plot
+# Get the row for the specified subject
+cr_psd_sub = cr_psd[cr_psd['sub'] == sub_id]
+# Plot the PSD for the subject
+if not cr_psd_sub.empty:
+    frequencies_v, psd_v = cr_psd_sub['cr_psd_v'].values[0]
+    frequencies_a, psd_a = cr_psd_sub['cr_psd_a'].values[0]
+    
+    plt.figure(figsize=(12, 6))
+    plt.semilogy(frequencies_v, psd_v, label="Valence", color='blue')
+    plt.semilogy(frequencies_a, psd_a, label="Arousal", linestyle='--', color='orange')
+    plt.title(f'Power Spectral Density of CRs for {sub_id}')
+    plt.xlabel('Frequency (Hz)')
+    plt.ylabel('PSD (V^2/Hz)')
+    plt.legend()
+    plt.xlim(0, fs/2)
+    plt.grid()
+    plt.show()
+
+# %% PLOT CR FOR ONE SUBJECT
+# Get the CR data for the specified subject
+cr_data_sub = cr_data[cr_data['sub'] == sub_id]
+# Plot the CR data for the subject
+if not cr_data_sub.empty:
+    plt.figure(figsize=(12, 6))
+    plt.plot(cr_data_sub['cr_time'], cr_data_sub['cr_v'], label='Valence', color='blue')
+    plt.plot(cr_data_sub['cr_time'], cr_data_sub['cr_a'], label='Arousal', color='orange')
+    plt.title(f'CRs for {sub_id}')
+    plt.xlabel('Time (s)')
+    plt.ylabel('CR Value')
+    plt.legend()
+    plt.grid()
+    plt.show()
+# %%
