@@ -12,6 +12,7 @@ import pandas as pd
 import os
 from scipy.stats import ttest_ind
 from statsmodels.formula.api import ols
+import statsmodels.api as sm
 
 # %%
 # Set paths and experiment parameters
@@ -128,7 +129,7 @@ for dim in rat_dim:
     # ANOVA on CRis, with test_site, position and gender as factors
     model = ols('cr_mean_' + rat_dim[dim] + ' ~ C(test_site) + C(gender)', data=cri_sr_dim).fit()
     anova_table = sm.stats.anova_lm(model, typ=2)
-    anova_table.index.name = cri + '_' + dim
+    anova_table.index.name = 'cr_mean_' + dim
     anova_table.reset_index(inplace=True)
 
 

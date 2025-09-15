@@ -1,30 +1,106 @@
 # affecttracker_validation
 
-`[Last update: April 23, 2025]`
+`[Last update: September 15, 2025]`
 
 ***
-    Period:     2025-04 - ...
-    Status:     work in progress
+    Period:     2023-04 - 2025-09
+    Status:     published
 
     Author(s):  Antonin Fourcade
     Contact:    antonin.fourcade@maxplanckschools.de
 
 ***
 
-*In general, one can add README's in nearly every folder. The guiding principle should always be that any person who is not familiar with the project can find their way exclusively via the README's – 'This may be you one day'*
-
 ## Project description
 
-Scripts for the validation of the AffectTracker, a tool to continously rate 2d affective experiences in real-time
+Scripts for the validation of the AffectTracker, a tool to continously rate 2D (valence, arousal) affective experiences in real-time using Unity
 
 Fourcade, A., Malandrone, F., Roellecke, L., Ciston, A., de Mooij, J., Villringer, A., Carletto S., Gaebler, M. (2024, December 16). AffectTracker: Real-time continuous rating of affective experience in immersive Virtual Reality. PsyArXiv preprint https://doi.org/10.31234/osf.io/xemwb
 
 https://github.com/afourcade/AffectTracker
 
+Data repository: https://doi.org/10.17617/3.QPNSJA
+
 ## Project structure
 
-*A brief description of the folder structure of the project (Where is what?). Anticipate new lab members who suppose to be able to orientate within this structure without your help. At the same time, avoid too detailed descriptions. Down the folder structure, there suppose to be further README's explaining subsequent folders & data.*
+```
+affecttracker_validation/
+├── README.md                           # Project overview and setup instructions
+├── requirements.txt                    # Python dependencies
+├── .gitignore                         # Version control exclusions
+│
+├── code/                              # All source code
+│   ├── README.md                      # Code-specific documentation
+│   ├── configs/                       # Configuration files
+│   │   ├── config.toml               # Main configuration parameters
+│   │   └── private_config.toml       # Local/sensitive overrides
+│   │
+│   └── affecttracker_validation/      # Main Python package
+│       ├── __init__.py
+│       ├── configs.py                 # Configuration loader/manager
+│       │
+│       ├── comparison_select_eval/    # Comparison Selection vs. Evaluation studies
+│       │   ├── __init__.py
+│       │   ├── comparison_phase_survey.py    # Survey phase comparisons
+│       │   └── comparison_phase_variability.py # Variability phase comparisons
+│       │
+│       ├── evaluation/                # Code for Evaluation study
+│       │   ├── __init__.py
+│       │   │
+│       │   ├── datavisualization/    # Plotting and visualization
+│       │   │   ├── __init__.py
+│       │   │   ├── cr_plot.py        # Continuous ratings plots
+│       │   │   ├── cri_sr_corr_plot.py # CRi-SR correlation plots
+│       │   │   ├── motion_plot.py    # Motion data visualization
+│       │   │   ├── sr_plot.py        # Summary ratings plots
+│       │   │   ├── survey_plot.py    # Survey response plots
+│       │   │   └── survey_plot_extras.py # Additional survey visualizations
+│       │   │
+│       │   ├── modeling/              # Statistical analysis & modeling
+│       │   │   ├── __init__.py
+│       │   │   ├── control_analyses.py     # Control analyses
+│       │   │   ├── corr_cr_sr.py           # CRi-SR correlations
+│       │   │   ├── cr_freq_change.py       # CR change frequency analysis
+│       │   │   └── descriptive_stats.py    # Summary statistics
+│       │   │
+│       │   └── preprocessing/         # Data cleaning & preparation
+│       │       ├── __init__.py
+│       │       ├── bids_formatting.py       # BIDS format conversion
+│       │       ├── check_length_sequence_videos.py # Video validation
+│       │       ├── cri_sr.py               # CRi & SR data processing
+│       │       ├── import_cr.py            # Continuous ratings import
+│       │       ├── import_motion.py        # Motion data import
+│       │       ├── import_PRE_survey.py    # Pre-experiment survey import
+│       │       ├── import_POST_survey.py   # Post-experiment survey import
+│       │       ├── preprocess_PRE_survey.py # Pre-survey preprocessing
+│       │       └── preprocess_POST_survey.py # Post-survey preprocessing
+│       │
+│       └── selection/                 # Code for Selection study
+│           ├── __init__.py
+│           │
+│           ├── datavisualization/     # Plotting and visualization
+│           │   ├── __init__.py
+│           │   ├── cr_plot.R          # R-based CR plotting
+│           │   ├── cr_plot_extra.R    # extra plots
+│           │   └── radar_plot.py      # Radar/spider plots
+│           │
+│           ├── modeling/              # Statistical analysis & modeling
+│           │   ├── __init__.py
+│           │   ├── assessment_others.R     # Survey analysis (R)
+│           │   ├── corr_cr_sr.R            # Correlations CR-SR (R)
+│           │   ├── descriptive_stats.py    # Descriptive stats
+│           │   ├── invasiveness.R          # Invasiveness analysis (R)
+│           │   └── util.R                  # R utilities
+│           │
+│           └── preprocessing/         # Data cleaning & preparation
+│               ├── __init__.py
+│               ├── cri_rs.py               # CRi & SR data processing
+│               ├── import_cr.py            # Continuous ratings import
+│               ├── import_questionnaire.py # Survey import
+│               ├── preprocess_questionnaire.py # Survey preprocessing
 
+
+```
 ## Install research code as package
 
 In case, there is no project-related virtual / conda environment yet, create one for the project:
@@ -51,19 +127,12 @@ i.e., changes to the code will be directly reflected in the installed package.
 Moreover, the code keeps its access to the research data in the underlying folder structure.
 Thus, the `-e` flag is recommended to use.
 
-*R*-projects should be initialized in the project root `.` with, e.g., `RStudio` as *existing directory*.
-Corresponding *R*-scripts can be stored in `./code/Rscripts/`
-
-Similarly, use this structure for Matlab or other programming languages, which are employed in this project.
-
 ## Publications
+Please cite:
 
-*List publications resulted from this project (including papers, posters, talks, ...)*
-
-## Preregistration
-
-*If applicable, was the project pre-registered and if yes, when and where (link)*
+Fourcade, A., Malandrone, F., Roellecke, L., Ciston, A., de Mooij, J., Villringer, A., Carletto S., Gaebler, M. (2025). AffectTracker: real-time continuous rating of affective experience in immersive virtual reality. doi: 10.3389/frvir.2025.1567854
 
 ## Contributors/Collaborators
 
-*Name people who are involved in this project, their position and/or contribution. Optional: add contact data*
+Antonin Fourcade
+Lucy Roellecke

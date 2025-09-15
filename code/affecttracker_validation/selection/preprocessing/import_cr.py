@@ -1,6 +1,7 @@
 ########################################################################################################################
 # Script to import CR data from AVR experiment
 # Preprocessing steps (optional): resampling and cut first seconds of data
+# Input: csv files (trial_results.csv)
 # Output: csv file (dataframe)
 # Author: Antonin Fourcade
 # Last version: 15.08.2023

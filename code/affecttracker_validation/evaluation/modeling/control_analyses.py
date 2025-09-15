@@ -3,7 +3,7 @@
 # Need csv files containing CRi, SR and survey data, from cri_sr.py, import_PRE_questionnaire.py and import_POST_questionnaire.py
 # Output: csv files (dataframe) containing ANOVA results
 # Author: Antonin Fourcade
-# Last version: 12.03.2025
+# Last version: 12.06.2025
 ########################################################################################################################
 
 # %%
@@ -39,7 +39,7 @@ cri_sr = pd.read_csv(cri_path)
 # CRis of interest
 cri_select = ['cr_mean', 'cr_std', 'cr_skew', 'cr_kurtosis']
 # position of interest
-pos_select = ['seated', 'standing'] # ['seated']
+pos_select = ['seated'] # ['seated', 'standing']
 
 # path to survey csv files and load data
 filename_pre = 'pre_survey_preprocessed.csv'

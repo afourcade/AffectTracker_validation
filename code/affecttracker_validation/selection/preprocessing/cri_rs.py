@@ -1,6 +1,6 @@
 ########################################################################################################################
 # Script to preprocess CR data from AVR experiment into CR indices
-# Need csv file containing CR data, from import_cr.py
+# Input: csv file containing CR data, from import_cr.py
 # Output: csv file (dataframe) containing all CR indices and SR
 # Author: Antonin Fourcade
 # Last version: 15.08.2023

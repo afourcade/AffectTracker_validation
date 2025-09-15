@@ -39,8 +39,8 @@ if excluded_subs:
 # %% FREQUENCY CHANGE WITH THRESHOLD ANALYSIS
 # for each participant, calculate the frequency of change in CRs
 # CRs are considered to have changed if the value is different from the previous value by a threshold of thresh
-# thresh = 0.1  # threshold for change, 0.1 = 5% of the range [-1, 1] for valence and arousal CRs
-thresh = 0.05
+thresh = 0.1  # threshold for change, 0.1 = 5% of the range [-1, 1] for valence and arousal CRs
+# thresh = 0.05
 def calculate_change_frequency(cr_series, fs, threshold):
     """
     Calculate the frequency of change in a CR series.
@@ -150,11 +150,11 @@ def plot_change_frequency_raincloud(cr_change_freq):
     ax.set_xlabel('Dimension')
     ax.set_ylabel('Change Frequency (Hz)')
     plt.xticks(rotation=45)
-    plt.grid(axis='y',)
+    plt.grid(axis='y', alpha=0.5)
     # Remove the legend for the hue
     plt.legend([], [], frameon=False)
     # Set the y-axis limits
-    ax.set_ylim(0, 1.5) # adjust this limit based on your data range
+    ax.set_ylim(0, 0.7) # adjust this limit based on your data range
     
     plt.tight_layout()
     plt.show()
