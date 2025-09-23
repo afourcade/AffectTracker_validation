@@ -1,4 +1,4 @@
-# affecttracker_validation
+# AffectTracker_validation
 
 `[Last update: September 23, 2025]`
 
@@ -106,13 +106,13 @@ affecttracker_validation/
 In case, there is no project-related virtual / conda environment yet, create one for the project:
 
 ```shell
-conda create -n affe_3.11 python=3.11
+conda create -n affecttracker_3.11 python=3.11
 ```
 
 And activate it:
 
 ```shell
-conda activate affe_3.11
+conda activate affecttracker_3.11
 ```
 
 Then install the code of the research project as python package:
