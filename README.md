@@ -1,6 +1,6 @@
 # affecttracker_validation
 
-`[Last update: September 15, 2025]`
+`[Last update: September 23, 2025]`
 
 ***
     Period:     2023-04 - 2025-09
@@ -15,9 +15,9 @@
 
 Scripts for the validation of the AffectTracker, a tool to continously rate 2D (valence, arousal) affective experiences in real-time using Unity
 
-Fourcade, A., Malandrone, F., Roellecke, L., Ciston, A., de Mooij, J., Villringer, A., Carletto S., Gaebler, M. (2024, December 16). AffectTracker: Real-time continuous rating of affective experience in immersive Virtual Reality. PsyArXiv preprint https://doi.org/10.31234/osf.io/xemwb
+*Fourcade A, Malandrone F, Roellecke L, Ciston A, Mooij JD, Villringer A, Carletto S and Gaebler M (2025) AffectTracker: real-time continuous rating of affective experience in immersive virtual reality. Front. Virtual Real. 6:1567854. [doi: 10.3389/frvir.2025.1567854](https://www.frontiersin.org/journals/virtual-reality/articles/10.3389/frvir.2025.1567854/full)*
 
-https://github.com/afourcade/AffectTracker
+AffectTracker repository: https://github.com/afourcade/AffectTracker
 
 Data repository: https://doi.org/10.17617/3.QPNSJA
 
@@ -80,8 +80,8 @@ affecttracker_validation/
 │           │
 │           ├── datavisualization/     # Plotting and visualization
 │           │   ├── __init__.py
-│           │   ├── cr_plot.R          # R-based CR plotting
-│           │   ├── cr_plot_extra.R    # extra plots
+│           │   ├── cr_plot.R          # R-based CR plotting (R)
+│           │   ├── cr_plot_extra.R    # extra plots (R)
 │           │   └── radar_plot.py      # Radar/spider plots
 │           │
 │           ├── modeling/              # Statistical analysis & modeling
@@ -90,7 +90,7 @@ affecttracker_validation/
 │           │   ├── corr_cr_sr.R            # Correlations CR-SR (R)
 │           │   ├── descriptive_stats.py    # Descriptive stats
 │           │   ├── invasiveness.R          # Invasiveness analysis (R)
-│           │   └── util.R                  # R utilities
+│           │   └── util.R                  # R utilities (R)
 │           │
 │           └── preprocessing/         # Data cleaning & preparation
 │               ├── __init__.py
@@ -130,7 +130,7 @@ Thus, the `-e` flag is recommended to use.
 ## Publications
 Please cite:
 
-Fourcade, A., Malandrone, F., Roellecke, L., Ciston, A., de Mooij, J., Villringer, A., Carletto S., Gaebler, M. (2025). AffectTracker: real-time continuous rating of affective experience in immersive virtual reality. doi: 10.3389/frvir.2025.1567854
+*Fourcade A, Malandrone F, Roellecke L, Ciston A, Mooij JD, Villringer A, Carletto S and Gaebler M (2025) AffectTracker: real-time continuous rating of affective experience in immersive virtual reality. Front. Virtual Real. 6:1567854. doi: 10.3389/frvir.2025.1567854*
 
 ## Contributors/Collaborators
 
